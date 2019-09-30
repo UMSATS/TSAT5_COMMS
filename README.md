@@ -1,9 +1,9 @@
 # TSAT5_COMMS
-----------------------------------------
+#### hello from Ryan=======
 ##### hello from sanjay 
 
 
----------------------------------------
+
 ## getting started with github
 
 
@@ -36,6 +36,3 @@ type in this command in the command line `git remote add origin https://github.c
 
 ### Now you should be able to see your changes on github!
 
-
-
->>>>>>> f3db03ddb54712f26ced916318e62eecd49da24c
