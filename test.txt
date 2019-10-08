@@ -1,7 +1,0 @@
-This is a test of using git
-
-This is a test to check if the updated file is uploaded
-
-Hello all
-
-this file has been changed
