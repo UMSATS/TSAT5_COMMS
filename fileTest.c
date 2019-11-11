@@ -11,7 +11,7 @@
 
 unsigned char* get_image_binary(char *location) {
 
-        //Input file
+    //Input file
     FILE *inFile;
 
     //Total file size
@@ -38,7 +38,6 @@ unsigned char* get_image_binary(char *location) {
     //Create an input (/output) buffer the size of the file.
     buffer = (char *)malloc(fileSize);
 
-    unsigned char static_buffer[fileSize];
 
     //Read input file and store in buffer.
     //After this we are done with the file and can close it.
