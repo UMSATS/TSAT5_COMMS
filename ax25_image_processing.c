@@ -4,39 +4,44 @@
 #include <string.h>
 
 unsigned char* get_image_binary(char *location) {
+    /*
+     * get_image_binary - Returns an area in memory which holds the entire image binary.
+     * 
+     * INPUT: (String)location - file path to image location.
+     */ 
 
     //Input file
-    FILE *inFile;
+    FILE *input_file;
 
     //Total file size
-    unsigned long int fileSize;
+    unsigned long int file_size;
 
 
-    //Pointer to buffer
+    //Pointer to buffer which will store image binary
     unsigned char *buffer;
 
-
-    inFile = fopen(location, "rb");
+    //Open file. "rb" = binary read mode
+    input_file = fopen(location, "rb");
 
     //Check to see file was opened successfully, otherwise terminate.
-    if(inFile == NULL){
+    if(input_file == NULL){
         printf("ERROR! Could not open file!");
-        return (unsigned char *)1;
+        return NULL;
     }
 
     //Get file size (length in bytes).
-    fseek(inFile, 0, SEEK_END);
-    fileSize = ftell(inFile);
-    fseek(inFile, 0, SEEK_SET);
+    fseek(input_file, 0, SEEK_END);
+    file_size = ftell(input_file);
+    fseek(input_file, 0, SEEK_SET);
 
     //Create an input (/output) buffer the size of the file.
-    buffer = (unsigned char *)malloc(fileSize);
+    buffer = (char *)malloc(file_size);
 
 
     //Read input file and store in buffer.
     //After this we are done with the file and can close it.
-    fread(buffer, fileSize, sizeof(unsigned char), inFile);
-    fclose(inFile);
+    fread(buffer, file_size, sizeof(unsigned char), input_file);
+    fclose(input_file);
 
 
 
@@ -45,46 +50,59 @@ unsigned char* get_image_binary(char *location) {
 
 
 unsigned int get_image_size(char *location) {
+    /*
+     * get_image_size - returns the file size of the image.
+     * 
+     * INPUTS: (String)location - file path to image location.
+     */
+    
 
-    FILE *inFile;
+    FILE *input_file;
 
-    size_t fileSize;
+    unsigned int file_size;
 
-    inFile = fopen(location, "rb");
+    input_file = fopen(location, "rb");
 
     //Check to see file was opened successfully, otherwise terminate.
-    if(inFile == NULL){
-        printf("ERROR! Could not open file!");
+    if(input_file == NULL){
+        printf("ERROR! Could not open file!\n");
         return 1;
     }
 
-    fseek(inFile, 0, SEEK_END);
-    fileSize = ftell(inFile);
-    fseek(inFile, 0, SEEK_SET);
-    fclose(inFile);
-    return fileSize;
+    //Place pointer at end of file, set file_size, reset pointer.
+    fseek(input_file, 0, SEEK_END);
+    file_size = ftell(input_file);
+    fseek(input_file, 0, SEEK_SET);
+
+    //Close file once done.
+    fclose(input_file);
+    return file_size;
 }
 
 
 int save_to_image(char *location, unsigned int image_size, unsigned char *input){
+    /*
+     * save_to_image - Saves image file from binary input to specific location.
+     * 
+     * INPUTS:  (String)location            - file path to image location.
+     *          (unsigned int)image_size    - Total size of the image
+     *          (unsigned char *)input      - Binary input.
+     */
 
-    if (image_size <= 4) return 1;
+    //Output file
+    FILE *output_file;
 
-    FILE *outFile;
+    output_file = fopen(location, "wb");
 
-    outFile = fopen(location, "wb");
-
-    if (outFile==NULL){
-        printf("\n\n ERROR CREATING OUTPUT FILE.");
+    //End program if opening file failed.
+    if(output_file==NULL){
+        printf("ERROR CREATING OUTPUT FILE.\n");
         return 1;
     }
 
-
-    //printf((int)size);
-
     //Write contents of buffer to file and close the file.
-    fwrite(input, image_size, sizeof(unsigned char), outFile);
-    fclose(outFile);
+    fwrite(input, image_size, sizeof(unsigned char), output_file);
+    fclose(output_file);
 
     return 0;
 
