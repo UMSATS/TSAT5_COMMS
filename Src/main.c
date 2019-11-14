@@ -55,14 +55,15 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
+static void reset_device(void)
+{
+    HAL_GPIO_WritePin(GPIOB, SI446x_SDN_PIN, GPIO_PIN_SET);
+    HAL_Delay(50); // Plenty of time to accomodate Power-on-reset on chip.
+    HAL_GPIO_WritePin(GPIOB, SI446x_SDN_PIN, GPIO_PIN_RESET);
+    HAL_Delay(50);
+}
 
 /**
   * @brief  The application entry point.
@@ -70,7 +71,7 @@ static void MX_SPI1_Init(void);
   */
 int main(void)
 {
-
+    // Initialization of HAL Libraries, Including UART, SPI, and GPIO.
     HAL_Init();
 
     SystemClock_Config();
@@ -78,6 +79,9 @@ int main(void)
     MX_GPIO_Init();
     MX_USART2_UART_Init();
     MX_SPI1_Init();
+
+    //
+    reset_device();
 
     while (1)
     {
