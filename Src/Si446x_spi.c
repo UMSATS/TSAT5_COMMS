@@ -6,7 +6,6 @@
  * Web: http://blog.zakkemble.co.uk/si4463-radio-library-avr-arduino/
  */
 
-#include <avr/io.h>
 #include "Si446x_spi.h"
 
 void spi_init()

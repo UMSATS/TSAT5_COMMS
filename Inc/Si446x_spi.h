@@ -9,8 +9,6 @@
 #ifndef SI446X_SPI_H_
 #define SI446X_SPI_H_
 
-#include <avr/io.h>
-
 void spi_init(void);
 
 inline void spi_transfer_nr(uint8_t data)

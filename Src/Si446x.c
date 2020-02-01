@@ -6,17 +6,9 @@
  * Web: http://blog.zakkemble.co.uk/si4463-radio-library-avr-arduino/
  */
 
-#ifdef ARDUINO
-#include <Arduino.h>
-#include <SPI.h>
-#else
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/pgmspace.h>
-#include <util/atomic.h>
-#include <util/delay.h>
+
 #include "Si446x_spi.h"
-#endif
+
 
 #include <string.h>
 #include <stdint.h>

@@ -9,10 +9,6 @@
 #ifndef SI443X_H_
 #define SI443X_H_
 
-#ifdef ARDUINO
-#include <Arduino.h>
-#endif
-
 #include <stdint.h>
 
 #include "Si446x_config.h"
