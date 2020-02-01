@@ -40,7 +40,7 @@
 #endif
 
 // TODO: Move this code to a different file, like "Si446x_utils"?
-#define	delay_ms(ms)			_delay_ms(ms);
+#define	delay_ms(ms)			HAL_Delay(ms);
 // #define delay_us(us)			_delay_us(us) // Unused in the rest of the program. 
 // TODO: Implement spiSelect and spiDeselect either here or in another file.
 #define spiSelect()				(CSN_PORT &= ~_BV(CSN_BIT))
