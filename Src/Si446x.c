@@ -9,6 +9,7 @@
 
 #include "Si446x_spi.h"
 
+#include "stm32l0xx_hal.h" // Allows for usage of STM32 HAL-Specific functions, like HAL_Delay().
 
 #include <string.h>
 #include <stdint.h>
@@ -38,19 +39,13 @@
 	#endif
 #endif
 
-#ifdef ARDUINO
-#define	delay_ms(ms)			delay(ms)
-#define delay_us(us)			delayMicroseconds(us)
-#define spiSelect()				(digitalWrite(SI446X_CSN, LOW))
-#define spiDeselect()			(digitalWrite(SI446X_CSN, HIGH))
-#define spi_transfer_nr(data)	(SPI.transfer(data))
-#define spi_transfer(data)		(SPI.transfer(data))
-#else
-#define	delay_ms(ms)			_delay_ms(ms)
-#define delay_us(us)			_delay_us(us)
+// TODO: Move this code to a different file, like "Si446x_utils"?
+#define	delay_ms(ms)			_delay_ms(ms);
+// #define delay_us(us)			_delay_us(us) // Unused in the rest of the program. 
+// TODO: Implement spiSelect and spiDeselect either here or in another file.
 #define spiSelect()				(CSN_PORT &= ~_BV(CSN_BIT))
 #define spiDeselect()			(CSN_PORT |= _BV(CSN_BIT))
-#endif
+
 
 static const uint8_t config[] PROGMEM = RADIO_CONFIGURATION_DATA_ARRAY;
 
