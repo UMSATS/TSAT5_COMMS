@@ -424,17 +424,12 @@ static void interrupt2(void* buff, uint8_t clearPH, uint8_t clearMODEM, uint8_t 
 // Reset the RF chip
 static void resetDevice(void)
 {
-#ifdef ARDUINO
-	digitalWrite(SI446X_SDN, HIGH);
-	delay_ms(50);
-	digitalWrite(SI446X_SDN, LOW);
-	delay_ms(50);
-#else
-	SDN_PORT |= _BV(SDN_BIT);
-	delay_ms(50);
-	SDN_PORT &= ~_BV(SDN_BIT);
-	delay_ms(50);
-#endif
+    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT); // Upper half of BSRR Register corresponds to setting pin LOW.
+    delay_ms(50);
+    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT + 16); // Upper half of BSRR Register corresponds to setting pin HIGH.
+    delay_ms(50);
+    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT);
+    delay_ms(50);
 }
 
 /*
