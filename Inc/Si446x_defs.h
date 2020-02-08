@@ -122,6 +122,8 @@ typedef enum
 #define SI446X_PKT_FIELD_2_LENGTH_LOW	PKT_PROP(0x12)
 
 
+#define SPI_PORT SPI1 // Current SPI peripheral used. Change if needed.
+
 #ifndef ARDUINO
 
 	#include "Si446x_config.h"
