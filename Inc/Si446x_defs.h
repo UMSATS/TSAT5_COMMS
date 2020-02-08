@@ -124,6 +124,12 @@ typedef enum
 
 #define SPI_PORT SPI1 // Current SPI peripheral used. Change if needed.
 
+#define PORT(port)			CONCAT(GPIO, port) // Forms expressions for calling specific registers.
+
+#define CSN_PORT		PORT(SI446X_CSN_PORT)
+#define SDN_PORT		PORT(SI446X_SDN_PORT)
+
+
 #ifndef ARDUINO
 
 	#include "Si446x_config.h"
@@ -131,22 +137,6 @@ typedef enum
 	#define CONCAT(a, b) a ## b
 	#define CONCAT2(a, b, c) a ## b ## c
 
-	#define PORT(port)			CONCAT(PORT, port)
-	#define PORTBIT(port, bit)	CONCAT2(PORT, port, bit)
-	#define DDR(port)			CONCAT(DDR, port)
-	#define PINPORT(port)		CONCAT(PIN, port)
-	#define PINBIT(port, bit)	CONCAT2(PIN, port, bit)
-	#define PCINT(pcint)		CONCAT(PCINT, pcint)
-	#define PUE(port)			CONCAT(PUE, port)
-	#define PUEBIT(port, bit)	CONCAT2(PUE, port, bit)
-
-	#define CSN_DDR			DDR(SI446X_CSN_PORT)
-	#define CSN_PORT		PORT(SI446X_CSN_PORT)
-	#define CSN_BIT			PORTBIT(SI446X_CSN_PORT, SI446X_CSN_BIT)
-
-	#define SDN_DDR			DDR(SI446X_SDN_PORT)
-	#define SDN_PORT		PORT(SI446X_SDN_PORT)
-	#define SDN_BIT			PORTBIT(SI446X_SDN_PORT, SI446X_SDN_BIT)
 
 	#if defined(SI446X_IRQ_PORT) && defined(SI446X_IRQ_BIT)
 		#define IRQ_DDR			DDR(SI446X_IRQ_PORT)
