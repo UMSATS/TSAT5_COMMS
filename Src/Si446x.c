@@ -41,11 +41,6 @@
 
 // TODO: Move this code to a different file, like "Si446x_utils"?
 #define	delay_ms(ms)			HAL_Delay(ms);
-// #define delay_us(us)			_delay_us(us) // Unused in the rest of the program. 
-// TODO: Implement spiSelect and spiDeselect either here or in another file.
-#define spiSelect()				(CSN_PORT &= ~_BV(CSN_BIT))
-#define spiDeselect()			(CSN_PORT |= _BV(CSN_BIT))
-
 
 static const uint8_t config[] PROGMEM = RADIO_CONFIGURATION_DATA_ARRAY;
 
@@ -116,15 +111,13 @@ static inline uint8_t interrupt_on(void)
 
 static inline uint8_t cselect(void)
 {
-//	spi_enable();
-	spiSelect();
+	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT); // Bitshifts left to lower half of register.
 	return 1;
 }
 
 static inline uint8_t cdeselect(void)
 {
-	spiDeselect();
-//	spi_disable();
+	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT + 16); // Bitshifts left to the upper half of the register.
 	return 0;
 }
 
