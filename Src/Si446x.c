@@ -450,18 +450,9 @@ static void applyStartupConfig(void)
 void Si446x_init()
 {
 	spiDeselect();
-#ifdef ARDUINO
-	pinMode(SI446X_CSN, OUTPUT);
-	pinMode(SI446X_SDN, OUTPUT);
-#if SI446X_IRQ != -1
-	pinMode(SI446X_IRQ, INPUT_PULLUP);
-#endif
-	
-	SPI.begin();
-#else
-	CSN_DDR |= _BV(CSN_BIT);
-	SDN_DDR |= _BV(SDN_BIT);
 
+	gpio_init(); // TODO
+/*
 #ifdef IRQ_BIT
 	// Interrupt pin (input with pullup)
 #if defined(PUEA) || defined(PUEB) || defined(PUEC) || defined(PUED) || defined(PUEE)
@@ -470,9 +461,9 @@ void Si446x_init()
 	IRQ_PORT |= _BV(IRQ_BIT);
 #endif
 #endif
+*/ // TODO
 
 	spi_init();
-#endif
 
 	resetDevice();
 	applyStartupConfig();
@@ -481,10 +472,6 @@ void Si446x_init()
 
 	enabledInterrupts[IRQ_PACKET] = (1<<SI446X_PACKET_RX_PEND) | (1<<SI446X_CRC_ERROR_PEND);
 	//enabledInterrupts[IRQ_MODEM] = (1<<SI446X_SYNC_DETECT_PEND);
-
-#ifndef ARDUINO
-	// TODO Interrupt should trigger on low level, not falling edge?
-#endif
 
 	Si446x_irq_on(1);
 }
