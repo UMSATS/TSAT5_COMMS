@@ -596,7 +596,7 @@ void Si446x_setupWUT(uint8_t r, uint16_t m, uint8_t ldc, uint8_t config)
 		if(getProperty(SI446X_GLOBAL_CLK_CFG) != SI446X_DIVIDED_CLK_32K_SEL_RC)
 		{
 			setProperty(SI446X_GLOBAL_CLK_CFG, SI446X_DIVIDED_CLK_32K_SEL_RC);
-			delay_us(300); // Need to wait 300us for clock source to stabilize, see GLOBAL_WUT_CONFIG:WUT_EN info
+			delay_ms(3); // Need to wait [3 ms] for clock source to stabilize, see GLOBAL_WUT_CONFIG:WUT_EN info
 		}
 
 		// Setup WUT
@@ -869,7 +869,7 @@ uint8_t Si446x_dump(void* buff, uint8_t group)
 	for(uint8_t i=0;i<sizeof(groupSizes);i+=2)
 	{
 		uint8_t buff[2];
-		memcpy_P(buff, &groupSizes[i], sizeof(buff));
+		memcpy(buff, &groupSizes[i], sizeof(buff));
 
 		if(buff[0] == group)
 		{
@@ -895,7 +895,7 @@ uint8_t Si446x_dump(void* buff, uint8_t group)
 #if defined(ARDUINO) || SI446X_INTERRUPTS == 0
 void Si446x_SERVICE()
 #else
-ISR(INT_VECTOR)
+ISR(INT_VECTOR) // TODO: Change to STM32.
 #endif
 {
 #if defined(ARDUINO) && (SI446X_INTERRUPTS == 1 || SI446X_INT_SPI_COMMS == 1)
@@ -903,7 +903,7 @@ ISR(INT_VECTOR)
 #endif
 
 	uint8_t interrupts[8];
-	interrupt(interrupts);
+	interrupt(interrupts); // INTERRUPT TODO
 
 	// TODO remove
 	//SI446X_CB_DEBUG(interrupts);
@@ -981,7 +981,7 @@ ISR(INT_VECTOR)
 	if(interrupts[6] & (1<<SI446X_WUT_PEND))
 		SI446X_CB_WUT();
 
-#if defined(ARDUINO) && (SI446X_INTERRUPTS == 1 || SI446X_INT_SPI_COMMS == 1)
+#if defined(ARDUINO) && (SI446X_INTERRUPTS == 1 || SI446X_INT_SPI_COMMS == 1) // INTERRUPT TODO
 	isrBusy = 0;
 #endif
 }
