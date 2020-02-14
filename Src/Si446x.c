@@ -42,7 +42,7 @@
 // TODO: Move this code to a different file, like "Si446x_utils"?
 #define	delay_ms(ms)			HAL_Delay(ms);
 
-static const uint8_t config[] PROGMEM = RADIO_CONFIGURATION_DATA_ARRAY;
+static const uint8_t config[] = RADIO_CONFIGURATION_DATA_ARRAY;
 
 static volatile uint8_t enabledInterrupts[3];
 
@@ -260,7 +260,7 @@ static void setProperties(uint16_t prop, void* values, uint8_t len)
 	};
 
 	// Copy values into data, starting at index 4
-	memcpy(data + 4, values, len);
+	memcpy(data + 4, values, len); // Probably no need to port as its C?
 
 	doAPI(data, len + 4, NULL, 0);
 }
@@ -441,7 +441,7 @@ static void applyStartupConfig(void)
 	uint8_t buff[17];
 	for(uint16_t i=0;i<sizeof(config);i++)
 	{
-		memcpy_P(buff, &config[i], sizeof(buff));
+		memcpy(buff, &config[i], sizeof(buff));
 		doAPI(&buff[1], buff[0], NULL, 0);
 		i += buff[0];
 	}
@@ -713,6 +713,7 @@ void Si446x_write(void* buff, uint8_t len)
 uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onTxFinish)
 {
 	// TODO what happens if len is 0?
+	// TODO what happens if len > 128?
 
 #if SI446X_FIXED_LENGTH
 	// Stop the unused parameter warning
@@ -847,7 +848,7 @@ uint8_t Si446x_readGPIO()
 
 uint8_t Si446x_dump(void* buff, uint8_t group)
 {
-	static const uint8_t groupSizes[] PROGMEM = {
+	static const uint8_t groupSizes[] = {
 		SI446X_PROP_GROUP_GLOBAL,	0x0A,
 		SI446X_PROP_GROUP_INT,		0x04,
 		SI446X_PROP_GROUP_FRR,		0x04,
