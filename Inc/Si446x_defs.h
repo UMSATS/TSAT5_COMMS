@@ -123,6 +123,7 @@ typedef enum
 
 
 #define SPI_PORT SPI1 // Current SPI peripheral used. Change if needed.
+#define SPI_PORT_INIT_VALUES			0x034C
 
 #define PORT(port)			CONCAT(GPIO, port) // Forms expressions for calling specific registers.
 

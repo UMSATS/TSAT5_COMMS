@@ -33,19 +33,14 @@ inline uint8_t spi_transfer(uint8_t data)
 
 /**
  * @brief Initialize the CR1 Register parameters with a 32 bit input.
- * @param   spi_loc     Location of SPI typedef in.
- * @param   full_value  Full value of input parameters.
  */
-static void init_spi_param_cr1(ST_SPI *spi_loc, uint32_t full_value);
+static void init_spi_param_cr1();
 
 
 /**
  * @brief Initialize the SPI bus
- * @param spi_loc       The location of the SPI struct
- * @param spi_memloc    Pointer to location of SPI in memory
- * @param full_value    Full value of input parameters.
  */
-void init_spi(ST_SPI *spi_loc, SPI_TypeDef *spi_memloc, uint32_t full_value);
+void init_spi();
 
 
 
