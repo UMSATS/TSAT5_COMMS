@@ -121,9 +121,15 @@ typedef enum
 #define SI446X_PKT_FIELD_2_LENGTH		PKT_PROP(0x11)
 #define SI446X_PKT_FIELD_2_LENGTH_LOW	PKT_PROP(0x12)
 
+#ifdef __STM32L011xx_H
 
-#define SPI_PORT SPI1 // Current SPI peripheral used. Change if needed.
+#define SPI_PORT 						SPI1 // Current SPI peripheral used. Change if needed.
+#define SI446X_REG_EXTERNAL_INT			SPI1_IRQn
 #define SPI_PORT_INIT_VALUES			0x034C
+
+#define _BV(bit) 						(1 << (bit))
+
+#endif
 
 #define PORT(port)			CONCAT(GPIO, port) // Forms expressions for calling specific registers.
 

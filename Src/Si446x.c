@@ -7,15 +7,18 @@
  */
 
 
-#include "Si446x_spi.h"
-
-#include "stm32l0xx_hal.h" // Allows for usage of STM32 HAL-Specific functions, like HAL_Delay().
 
 #include <string.h>
 #include <stdint.h>
+
+// Allows for usage of STM32 HAL-Specific functions, like HAL_Delay().
+#include "stm32l0xx_hal.h"
+
+
 #include "Si446x.h"
 #include "Si446x_config.h"
 #include "Si446x_defs.h"
+#include "Si446x_spi.h"
 
 #include "radio_config.h"
 
@@ -28,6 +31,9 @@
 #define IRQ_PACKET				0
 #define IRQ_MODEM				1
 #define IRQ_CHIP				2
+
+
+
 
 #define rssi_dBm(val)			((val / 2) - 134)
 
@@ -42,9 +48,9 @@
 // TODO: Move this code to a different file, like "Si446x_utils"?
 #define	delay_ms(ms)			HAL_Delay(ms);
 
-static const uint8_t config[] PROGMEM = RADIO_CONFIGURATION_DATA_ARRAY;
+static const uint8_t config[] = RADIO_CONFIGURATION_DATA_ARRAY;
 
-static volatile uint8_t enabledInterrupts[3];
+static volatile uint8_t enabled_interrupts[3];
 
 // http://stackoverflow.com/questions/10802324/aliasing-a-function-on-a-c-interface-within-a-c-application-on-linux
 #if defined(__cplusplus)
@@ -54,6 +60,18 @@ extern "C" {
 	static void __empty_callback1(int16_t param1){(void)(param1);}
 #if defined(__cplusplus)
 }
+#endif
+
+#if defined(__STM32L011xx_H)
+uint8_t SI_DisableNMI(){
+	NVIC_DisableIRQ(NonMaskableInt_IRQn);
+	return 1;
+}
+uint8_t SI_EnableNMI(){
+	NVIC_EnableIRQ(NonMaskableInt_IRQn);
+	return 0;
+}
+
 #endif
 
 void __attribute__((weak, alias ("__empty_callback0"))) SI446X_CB_CMDTIMEOUT(void);
@@ -135,6 +153,8 @@ static inline uint8_t cdeselect(void)
 #define SI446X_ATOMIC() ((void)(0));
 #elif defined(ARDUINO)
 #define SI446X_ATOMIC() for(uint8_t _cs2 = interrupt_off(); _cs2; _cs2 = interrupt_on())
+#elif defined(__STM32L011xx_H)
+#define SI446X_ATOMIC() for(uint8_t _cs2 = SI_DisableNMI(); _cs2; _cs2 = SI_EnableNMI())
 #else
 #define SI446X_ATOMIC()	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 #endif
@@ -389,7 +409,7 @@ void __attribute__((weak)) SI446X_CB_RXINVALIDSYNC(void)
 {
 	uint8_t data = getProperty(SI446X_INT_CTL_MODEM_ENABLE);
 	enable ? (data |= 32) : (data &= ~32); // TODO use def for 32
-	enabledInterrupts[IRQ_MODEM] = data;
+	enabled_interrupts[IRQ_MODEM] = data;
 	setProperty(SI446X_INT_CTL_MODEM_ENABLE, data);
 }
 */
@@ -470,8 +490,8 @@ void Si446x_init()
 	interrupt(NULL);
 	Si446x_sleep();
 
-	enabledInterrupts[IRQ_PACKET] = (1<<SI446X_PACKET_RX_PEND) | (1<<SI446X_CRC_ERROR_PEND);
-	//enabledInterrupts[IRQ_MODEM] = (1<<SI446X_SYNC_DETECT_PEND);
+	enabled_interrupts[IRQ_PACKET] = (1<<SI446X_PACKET_RX_PEND) | (1<<SI446X_CRC_ERROR_PEND);
+	//enabled_interrupts[IRQ_MODEM] = (1<<SI446X_SYNC_DETECT_PEND);
 
 	Si446x_irq_on(1);
 }
@@ -589,7 +609,7 @@ void Si446x_setupWUT(uint8_t r, uint16_t m, uint8_t ldc, uint8_t config)
 		//intChip &= ~((1<<SI446X_INT_CTL_CHIP_LOW_BATT_EN)|(1<<SI446X_INT_CTL_CHIP_WUT_EN));
 		intChip |= doBatt<<SI446X_INT_CTL_CHIP_LOW_BATT_EN;
 		intChip |= doRun<<SI446X_INT_CTL_CHIP_WUT_EN;
-		enabledInterrupts[IRQ_CHIP] = intChip;
+		enabled_interrupts[IRQ_CHIP] = intChip;
 		setProperty(SI446X_INT_CTL_CHIP_ENABLE, intChip);
 
 		// Set WUT clock source to internal 32KHz RC
@@ -651,8 +671,8 @@ void Si446x_setupCallback(uint16_t callbacks, uint8_t state)
 		// TODO
 		// make sure RXCOMPELTE, RXINVALID and RXBEGIN? are always enabled
 
-		enabledInterrupts[IRQ_PACKET] = data[0];
-		enabledInterrupts[IRQ_MODEM] = data[1];
+		enabled_interrupts[IRQ_PACKET] = data[0];
+		enabled_interrupts[IRQ_MODEM] = data[1];
 		setProperties(SI446X_INT_CTL_PH_ENABLE, data, sizeof(data));
 	}
 /*
@@ -847,7 +867,7 @@ uint8_t Si446x_readGPIO()
 
 uint8_t Si446x_dump(void* buff, uint8_t group)
 {
-	static const uint8_t groupSizes[] PROGMEM = {
+	static const uint8_t groupSizes[] = {
 		SI446X_PROP_GROUP_GLOBAL,	0x0A,
 		SI446X_PROP_GROUP_INT,		0x04,
 		SI446X_PROP_GROUP_FRR,		0x04,
@@ -910,9 +930,9 @@ ISR(INT_VECTOR)
 	//printf_P(PSTR("INT %hhu/%hhu %hhu/%hhu %hhu/%hhu\n"), interrupts[2], interrupts[3], interrupts[4], interrupts[5], interrupts[6], interrupts[7]);
 
 	// We could read the enabled interrupts properties instead of keep their states in RAM, but that would be much slower
-	interrupts[2] &= enabledInterrupts[IRQ_PACKET];
-	interrupts[4] &= enabledInterrupts[IRQ_MODEM];
-	interrupts[6] &= enabledInterrupts[IRQ_CHIP];
+	interrupts[2] &= enabled_interrupts[IRQ_PACKET];
+	interrupts[4] &= enabled_interrupts[IRQ_MODEM];
+	interrupts[6] &= enabled_interrupts[IRQ_CHIP];
 
 	// Valid PREAMBLE and SYNC, packet data now begins
 	if(interrupts[4] & (1<<SI446X_SYNC_DETECT_PEND))

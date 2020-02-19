@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "Si446x_config.h"
+#include "Si446x.h"
 
 // Address matching doesnt really work very well as the FIFO still needs to be
 // manually cleared after receiving a packet, so the MCU still needs to wakeup and

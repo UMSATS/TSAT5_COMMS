@@ -90,6 +90,7 @@
 // Leave these commented out to let the library figure out what registers to use
 
 // Which interrupt to use for IRQ
+
 //#define SI446X_REG_EXTERNAL_INT	EIMSK
 //#define SI446X_BIT_EXTERNAL_INT	INT1
 //#define SI446X_INT_VECTOR			INT1_vect
@@ -102,7 +103,7 @@
 
 
 #define SI446X_CONCAT(a, b) a ## b
-#define SI446X_INTCONCAT(num) SI446X_CONCAT(INT, num)
+//#define SI446X_INTCONCAT(num) SI446X_CONCAT(INT, num)
 
 #ifndef SI446X_REG_EXTERNAL_INT
 	#ifdef EIMSK
@@ -110,7 +111,8 @@
 	#elif defined GICR
 		#define SI446X_REG_EXTERNAL_INT GICR
 	#else
-		#define SI446X_REG_EXTERNAL_INT GIMSK
+		//#define SI446X_REG_EXTERNAL_INT GIMSK
+		//Not sure what the purpose of this is for.
 	#endif
 #endif
 

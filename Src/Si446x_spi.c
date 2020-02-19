@@ -8,7 +8,7 @@
 
 #include "Si446x_spi.h"
 #include "Si446x.h"
-
+#include "Si446x_defs.h"
 
 
 ST_SPI si446x_spi;
@@ -78,7 +78,7 @@ void spi_init()
 // TODO: Setup registers for SPI1_CR relating to correct port values, speeds, modes, etc...
 //
 
-
+init_spi();
 
 // Max SPI clock of Si446x is 10MHz
 }
