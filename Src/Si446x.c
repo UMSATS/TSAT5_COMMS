@@ -710,10 +710,13 @@ void Si446x_write(void* buff, uint8_t len)
 
 #include <stdio.h>
 
+// Note for future - Possible error cases:
+// - Packet size not between 1 and 128 bytes.
+// - Device not ready to send - already transmitting?
+
 uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onTxFinish)
 {
-	// TODO what happens if len is 0?
-	// TODO what happens if len > 128?
+
 
 #if SI446X_FIXED_LENGTH
 	// Stop the unused parameter warning
@@ -722,8 +725,16 @@ uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onT
 
 	SI446X_NO_INTERRUPT()
 	{
-		if(getState() == SI446X_STATE_TX) // Already transmitting
+		if (getState() == SI446X_STATE_TX) { // Already transmitting
 			return 0;
+		}
+
+		// Check for bad packet size.
+#if !SI446X_FIXED_LENGTH // What if this is hard-coded to a bad value by accident?
+		if (len == 0 || len > 128) {
+			return 0; // See comment at start of function.
+		}
+#endif
 
 		// TODO collision avoid or maybe just do collision detect (RSSI jump)
 
@@ -791,7 +802,7 @@ void Si446x_RX(uint8_t channel)
 			channel,
 			0,
 			0,
-			SI446X_FIXED_LENGTH,
+			SI446X_FIXED_LENGTH, // TODO look into how packet length affects the FIFO for RX.
 			SI446X_STATE_NOCHANGE, // RX Timeout
 			IDLE_STATE, // RX Valid
 			SI446X_STATE_SLEEP // IDLE_STATE // RX Invalid (using SI446X_STATE_SLEEP for the INVALID_SYNC fix)
