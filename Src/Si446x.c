@@ -55,7 +55,7 @@ extern "C" {
 #if defined(__cplusplus)
 }
 #endif
-
+// TODO: Figure out what these do -NJR
 void __attribute__((weak, alias ("__empty_callback0"))) SI446X_CB_CMDTIMEOUT(void);
 void __attribute__((weak, alias ("__empty_callback1"))) SI446X_CB_RXBEGIN(int16_t rssi);
 void __attribute__((weak)) SI446X_CB_RXCOMPLETE(uint8_t length, int16_t rssi){(void)(length);(void)(rssi);}
