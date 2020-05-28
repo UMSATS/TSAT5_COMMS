@@ -31,6 +31,8 @@
 
 #define rssi_dBm(val)			((val / 2) - 134)
 
+
+// TODO: Redefine appropriately for STM32 -NJR
 #if SI446X_INTERRUPTS != 0
 	#if defined(ARDUINO) && SI446X_IRQ == -1
 		#error "SI446X_INTERRUPTS is 1, but SI446X_IRQ is set to -1!"
@@ -73,6 +75,8 @@ void __attribute__((weak, alias ("__empty_callback0"))) SI446X_CB_ADDRMISS(void)
 
 // http://www.nongnu.org/avr-libc/user-manual/atomic_8h_source.html
 
+
+// Start of the Interrupt setup routine. Mainly what needs to be done is setting the correct IRQ Port and bit, and figuring out what the counter logic in this #ifdef block does. -NJR
 #ifdef ARDUINO
 
 #if SI446X_INTERRUPTS != 0
@@ -121,7 +125,7 @@ static inline uint8_t cdeselect(void)
 	return 0;
 }
 
-#define CHIPSELECT()	for(uint8_t _cs = cselect(); _cs; _cs = cdeselect())
+#define CHIPSELECT()	for(uint8_t _cs = cselect(); _cs; _cs = cdeselect()) // Makes use of the behaviour of the expressions of for loops to run code once while Chipselected, then switching it off at the end.
 
 // TODO
 // 2 types of interrupt blocks
@@ -131,6 +135,8 @@ static inline uint8_t cdeselect(void)
 // If an interrupt might do some SPI communications with another device then we
 // need to turn global interrupts off while communicating with the radio.
 // Otherwise, just turn off our own radio interrupt while doing SPI stuff.
+
+// TODO: Figure out if this is going to cause problems later. -NJR
 #if SI446X_INTERRUPTS == 0 && SI446X_INT_SPI_COMMS == 0
 #define SI446X_ATOMIC() ((void)(0));
 #elif defined(ARDUINO)
@@ -161,6 +167,8 @@ uint8_t Si446x_irq_off()
 #endif
 }
 
+
+// Probably would be easier for now to Re-implement the arduino section as STM32 HAL function calls, since this is not necessarily timing-sensitive? -NJR
 void Si446x_irq_on(uint8_t origVal)
 {
 #if SI446X_INTERRUPTS != 0
@@ -903,6 +911,7 @@ uint8_t Si446x_dump(void* buff, uint8_t group)
 	return length;
 }
 
+// This can be repurposed for ISRs.
 #if defined(ARDUINO) || SI446X_INTERRUPTS == 0
 void Si446x_SERVICE()
 #else
