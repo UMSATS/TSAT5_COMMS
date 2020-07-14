@@ -125,6 +125,29 @@ static inline uint8_t cdeselect(void)
 	return 0;
 }
 
+
+inline void spi_transfer_nr(uint8_t data)
+{
+	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
+
+    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
+    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
+        ;
+}
+
+inline uint8_t spi_transfer(uint8_t data)
+{
+    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
+    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
+        ;
+
+    // Adapted from STM32 HAL files.
+    return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
+}
+
+
+
+
 #define CHIPSELECT()	for(uint8_t _cs = cselect(); _cs; _cs = cdeselect()) // Makes use of the behaviour of the expressions of for loops to run code once while Chipselected, then switching it off at the end.
 
 // TODO
@@ -136,14 +159,20 @@ static inline uint8_t cdeselect(void)
 // need to turn global interrupts off while communicating with the radio.
 // Otherwise, just turn off our own radio interrupt while doing SPI stuff.
 
+/* DISABLED
 // TODO: Figure out if this is going to cause problems later. -NJR
 #if SI446X_INTERRUPTS == 0 && SI446X_INT_SPI_COMMS == 0
 #define SI446X_ATOMIC() ((void)(0));
 #elif defined(ARDUINO)
 #define SI446X_ATOMIC() for(uint8_t _cs2 = interrupt_off(); _cs2; _cs2 = interrupt_on())
 #else
-#define SI446X_ATOMIC()	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+#define SI446X_ATOMIC()	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) // ATOMIC_BLOCK is an AVR Extension.
 #endif
+
+*/
+
+
+/* DISABLED
 
 // When doing SPI comms with the radio or doing multiple commands we don't want the radio interrupt to mess it up.
 uint8_t Si446x_irq_off()
@@ -189,13 +218,15 @@ void Si446x_irq_on(uint8_t origVal)
 #endif
 }
 
+*/
+
 // Read CTS and if its ok then read the command buffer
 static uint8_t getResponse(void* buff, uint8_t len)
 {
 	uint8_t cts = 0;
 
-	SI446X_ATOMIC()
-	{
+	// SI446X_ATOMIC()
+	// { // BEGIN ATOMIC BLOCK.
 		CHIPSELECT()
 		{
 			// Send command
@@ -211,7 +242,7 @@ static uint8_t getResponse(void* buff, uint8_t len)
 					((uint8_t*)buff)[i] = spi_transfer(0xFF);
 			}
 		}
-	}
+	// } // END OF ATOMIC BLOCK
 	return cts;
 }
 
@@ -222,7 +253,7 @@ static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 	uint16_t timeout = 40000;
 	while(!getResponse(out, outLen))
 	{
-		delay_us(10);
+		delay_us(10); // Have to fix this.
 		if(useTimeout && !--timeout)
 		{
 			SI446X_CB_CMDTIMEOUT();
@@ -238,14 +269,14 @@ static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 	{
 		if(waitForResponse(NULL, 0, 1)) // Make sure it's ok to send a command
 		{
-			SI446X_ATOMIC()
-			{
+			// SI446X_ATOMIC()
+			// {
 				CHIPSELECT()
 				{
 					for(uint8_t i=0;i<len;i++)
 						spi_transfer_nr(((uint8_t*)data)[i]); // (pgm_read_byte(&((uint8_t*)data)[i]));
 				}
-			}
+			// }
 
 			if(((uint8_t*)data)[0] == SI446X_CMD_IRCAL) // If we're doing an IRCAL then wait for its completion without a timeout since it can sometimes take a few seconds
 				waitForResponse(NULL, 0, 0);
@@ -323,14 +354,14 @@ static uint16_t getADC(uint8_t adc_en, uint8_t adc_cfg, uint8_t part)
 static uint8_t getFRR(uint8_t reg)
 {
 	uint8_t frr = 0;
-	SI446X_ATOMIC()
-	{
+	// SI446X_ATOMIC()
+	// {
 		CHIPSELECT()
 		{
 			spi_transfer_nr(reg);
 			frr = spi_transfer(0xFF);
 		}
-	}
+	// }
 	return frr;
 }
 
@@ -481,7 +512,7 @@ void Si446x_init()
 	enabledInterrupts[IRQ_PACKET] = (1<<SI446X_PACKET_RX_PEND) | (1<<SI446X_CRC_ERROR_PEND);
 	//enabledInterrupts[IRQ_MODEM] = (1<<SI446X_SYNC_DETECT_PEND);
 
-	Si446x_irq_on(1);
+	// Si446x_irq_on(1); DISABLED
 }
 
 void Si446x_getInfo(si446x_info_t* info)
@@ -684,15 +715,15 @@ uint8_t Si446x_sleep()
 
 void Si446x_read(void* buff, uint8_t len)
 {
-	SI446X_ATOMIC()
-	{
+	// SI446X_ATOMIC()
+	// {
 		CHIPSELECT()
 		{
 			spi_transfer_nr(SI446X_CMD_READ_RX_FIFO);
 			for(uint8_t i=0;i<len;i++)
 				((uint8_t*)buff)[i] = spi_transfer(0xFF);
 		}
-	}
+	// }
 }
 /*
 // TODO maybe
@@ -750,8 +781,8 @@ uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onT
 		clearFIFO();
 		interrupt2(NULL, 0, 0, 0xFF);
 
-		SI446X_ATOMIC()
-		{
+		// SI446X_ATOMIC()
+		// {
 			// Load data to FIFO
 			CHIPSELECT()
 			{
@@ -765,7 +796,7 @@ uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onT
 					spi_transfer_nr(((uint8_t*)packet)[i]);
 #endif
 			}
-		}
+		// }
 
 #if !SI446X_FIXED_LENGTH
 		// Set packet length

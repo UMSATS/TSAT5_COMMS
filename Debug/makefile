@@ -32,13 +32,16 @@ default.size.stdout \
 OBJDUMP_LIST += \
 CommSoftware.list \
 
+OBJCOPY_BIN += \
+CommSoftware.bin \
+
 
 # All Target
 all: CommSoftware.elf secondary-outputs
 
 # Tool invocations
-CommSoftware.elf: $(OBJS) $(USER_OBJS) C:\Users\ninja\Documents\UMSATS\TSAT5_COMMS\STM32L011K4TX_FLASH.ld
-	arm-none-eabi-gcc -o "CommSoftware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\ninja\Documents\UMSATS\TSAT5_COMMS\STM32L011K4TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CommSoftware.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+CommSoftware.elf: $(OBJS) $(USER_OBJS) C:\Users\njreichert\Documents\UMSATS\TSAT5_COMMS\STM32L011K4TX_FLASH.ld
+	arm-none-eabi-gcc -o "CommSoftware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\njreichert\Documents\UMSATS\TSAT5_COMMS\STM32L011K4TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CommSoftware.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -52,12 +55,17 @@ CommSoftware.list: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+CommSoftware.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "CommSoftware.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 .PHONY: all clean dependents
 .SECONDARY:

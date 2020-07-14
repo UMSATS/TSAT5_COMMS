@@ -9,7 +9,11 @@
 #ifndef SI446X_SPI_H_
 #define SI446X_SPI_H_
 
+#include <stdint.h> // Really?
+
 void spi_init(void);
+
+/*
 
 inline void spi_transfer_nr(uint8_t data)
 {
@@ -29,5 +33,9 @@ inline uint8_t spi_transfer(uint8_t data)
     // Adapted from STM32 HAL files.
     return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
 }
+*/
+
+
+// MOVED TO si446x.c
 
 #endif /* SI446X_SPI_H_ */

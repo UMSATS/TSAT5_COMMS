@@ -99,7 +99,7 @@
 //#define SI446X_REG_EXTERNAL_INT_CTL	EICRA
 //#define SI446X_BIT_EXTERNAL_INT_CTL	(0)
 
-
+/*
 
 #define SI446X_CONCAT(a, b) a ## b
 #define SI446X_INTCONCAT(num) SI446X_CONCAT(INT, num)
@@ -110,7 +110,7 @@
 	#elif defined GICR
 		#define SI446X_REG_EXTERNAL_INT GICR
 	#else
-		#define SI446X_REG_EXTERNAL_INT GIMSK
+		#define SI446X_REG_EXTERNAL_INT GIMSK // REMOVED because of errors.
 	#endif
 #endif
 
@@ -118,6 +118,8 @@
 	#define SI446X_BIT_EXTERNAL_INT SI446X_INTCONCAT(SI446X_INTERRUPT_NUM)
 #endif
 
+
+*/
 
 
 // NOT PROPERLY TESTED, KEEP 1
