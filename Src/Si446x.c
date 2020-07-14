@@ -488,9 +488,9 @@ static void applyStartupConfig(void)
 
 void Si446x_init()
 {
-	spiDeselect();
+	cdeselect();
 
-	gpio_init(); // TODO
+	// gpio_init(); // TODO DISABLED?
 /*
 #ifdef IRQ_BIT
 	// Interrupt pin (input with pullup)
