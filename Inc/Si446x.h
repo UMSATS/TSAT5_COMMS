@@ -13,6 +13,9 @@
 
 #include "Si446x_config.h"
 
+// Add HAL for debug
+#include "stm32l0xx_hal.h"
+
 // Address matching doesnt really work very well as the FIFO still needs to be
 // manually cleared after receiving a packet, so the MCU still needs to wakeup and
 // do stuff instead of the radio doing things automatically :/
@@ -276,6 +279,13 @@ extern "C" {
 * @return (none)
 */
 void Si446x_init(void);
+
+
+
+// Add this for temporary HAL Access.
+static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout);
+
+
 
 /**
 * @brief Get chip info, see ::si446x_info_t

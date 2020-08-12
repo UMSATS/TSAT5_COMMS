@@ -113,20 +113,22 @@ static inline uint8_t interrupt_on(void)
 
 #endif
 
+
+// CHECK THIS - Bit shifting may be wrong
 static inline uint8_t cselect(void)
 {
-	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT); // Bitshifts left to lower half of register.
+	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT + 16); // Bitshifts left to lower half of register.
 	return 1;
 }
 
 static inline uint8_t cdeselect(void)
 {
-	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT + 16); // Bitshifts left to the upper half of the register.
+	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT); // Bitshifts left to the upper half of the register.
 	return 0;
 }
 
 
-inline void spi_transfer_nr(uint8_t data)
+void spi_transfer_nr(uint8_t data)
 {
 	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
 
@@ -135,7 +137,7 @@ inline void spi_transfer_nr(uint8_t data)
         ;
 }
 
-inline uint8_t spi_transfer(uint8_t data)
+uint8_t spi_transfer(uint8_t data)
 {
     *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
     while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
@@ -233,9 +235,12 @@ static uint8_t getResponse(void* buff, uint8_t len)
 			spi_transfer_nr(SI446X_CMD_READ_CMD_BUFF);
 
 			// Get CTS value
-			cts = (spi_transfer(0xFF) == 0xFF);
+			cts = spi_transfer(0xFE);
 
-			if(cts)
+			// Print CTS Value
+			// HAL_UART_Transmit(&huart2, cts, 1, 0xFFFFFFFF);
+
+			if(cts == 0xFF)
 			{
 				// Get response data
 				for(uint8_t i=0;i<len;i++)
@@ -250,10 +255,10 @@ static uint8_t getResponse(void* buff, uint8_t len)
 static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 {
 	// With F_CPU at 8MHz and SPI at 4MHz each check takes about 7us + 10us delay
-	uint16_t timeout = 40000;
+	uint16_t timeout = 500; // This should approximate about the same timeout? However with less checks.
 	while(!getResponse(out, outLen))
 	{
-		delay_us(10); // Have to fix this.
+		delay_ms(1); // Hoo boy this is slow. STM32 has no HAL routine for us delay.
 		if(useTimeout && !--timeout)
 		{
 			SI446X_CB_CMDTIMEOUT();
@@ -265,9 +270,9 @@ static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 
 static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 {
-	SI446X_NO_INTERRUPT()
-	{
-		if(waitForResponse(NULL, 0, 1)) // Make sure it's ok to send a command
+	//SI446X_NO_INTERRUPT() // DISABLED - Some sort of funky interrupt
+	//{
+		if(waitForResponse(NULL, 0, 0)) // Make sure it's ok to send a command (set useTimeout to false) -NJR
 		{
 			// SI446X_ATOMIC()
 			// {
@@ -283,7 +288,7 @@ static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 			else if(out != NULL) // If we have an output buffer then read command response into it
 				waitForResponse(out, outLen, 1);
 		}
-	}
+	//}
 }
 
 // Configure a bunch of properties (up to 12 properties in one go)
@@ -456,11 +461,11 @@ static void interrupt2(void* buff, uint8_t clearPH, uint8_t clearMODEM, uint8_t 
 // Reset the RF chip
 static void resetDevice(void)
 {
-    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT); // Upper half of BSRR Register corresponds to setting pin LOW.
+    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT + 16); // Upper half of BSRR Register corresponds to setting pin LOW.
     delay_ms(50);
-    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT + 16); // Upper half of BSRR Register corresponds to setting pin HIGH.
+    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT); // Upper half of BSRR Register corresponds to setting pin HIGH.
     delay_ms(50);
-    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT);
+    SDN_PORT->BSRR = 1 << (SI446X_SDN_BIT + 16);
     delay_ms(50);
 }
 
@@ -502,7 +507,9 @@ void Si446x_init()
 #endif
 */ // TODO
 
-	spi_init();
+	spi_init(); // Unused.
+
+	SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
 
 	resetDevice();
 	applyStartupConfig();
@@ -941,11 +948,15 @@ uint8_t Si446x_dump(void* buff, uint8_t group)
 	
 	return length;
 }
-
+/*
 // This can be repurposed for ISRs.
 #if defined(ARDUINO) || SI446X_INTERRUPTS == 0
 void Si446x_SERVICE()
 #else
+
+
+
+// Disabled - AVR-Specific Macto
 ISR(INT_VECTOR) // TODO: Change to STM32.
 #endif
 {
@@ -973,14 +984,14 @@ ISR(INT_VECTOR) // TODO: Change to STM32.
 //		Si446x_setupCallback(SI446X_CBS_INVALIDSYNC, 1); // Enable INVALID_SYNC when a new packet starts, sometimes a corrupted packet will mess the radio up
 		SI446X_CB_RXBEGIN(getLatchedRSSI());
 	}
-/*
-	// Disable INVALID_SYNC
-	if((interrupts[4] & (1<<SI446X_INVALID_SYNC_PEND)) || (interrupts[2] & ((1<<SI446X_PACKET_SENT_PEND)|(1<<SI446X_CRC_ERROR_PEND))))
-	{
-		//fix_invalidSync_irq(0);
-		Si446x_setupCallback(SI446X_CBS_INVALIDSYNC, 0);
-	}
-*/
+
+//	// Disable INVALID_SYNC
+//	if((interrupts[4] & (1<<SI446X_INVALID_SYNC_PEND)) || (interrupts[2] & ((1<<SI446X_PACKET_SENT_PEND)|(1<<SI446X_CRC_ERROR_PEND))))
+//	{
+//		//fix_invalidSync_irq(0);
+//		Si446x_setupCallback(SI446X_CBS_INVALIDSYNC, 0);
+//	}
+
 
 	// INVALID_SYNC detected, sometimes the radio gets messed up in this state and requires a RX restart
 //	if(interrupts[4] & (1<<SI446X_INVALID_SYNC_PEND))
@@ -1036,3 +1047,4 @@ ISR(INT_VECTOR) // TODO: Change to STM32.
 	isrBusy = 0;
 #endif
 }
+*/

@@ -7,9 +7,12 @@
  */
 
 #include "Si446x_spi.h"
+#include "Si446x_config.h"
 
 void spi_init()
 {
+
+
 // NOTE: The SPI SS pin must be configured as an output for the SPI controller to run in master mode, even if you're using a different pin for SS!
 // Also remember that some AVRs use different registers to enable pull-ups
 // Don't forget to check Si446x_config.h for the CSN, SDN and IRQ pin setup

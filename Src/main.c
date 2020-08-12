@@ -21,6 +21,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+#include "si446x.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -33,6 +35,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// #define SPI_PORT SPI1
+// #define CSN_PORT GPIOB
 
 /* USER CODE END PD */
 
@@ -62,6 +66,39 @@ static void MX_SPI1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/*
+uint8_t spi_transfer(uint8_t data)
+{
+    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
+    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
+        ;
+
+    // Adapted from STM32 HAL files.
+    return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
+}
+
+void spi_transfer_nr(uint8_t data)
+{
+	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
+
+    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
+    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
+        ;
+}
+
+static inline uint8_t cselect(void)
+{
+	GPIOA->BSRR = 1 << (4 + 16); // Bitshifts left to lower half of register. (I.E. Pulls low)
+	return 1;
+}
+
+static inline uint8_t cdeselect(void)
+{
+	GPIOA->BSRR = 1 << (4); // Bitshifts left to the upper half of the register. (I.E. Pulls high)
+	return 0;
+}
+
+*/
 /* USER CODE END 0 */
 
 /**
@@ -72,19 +109,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
-  
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
@@ -95,15 +119,33 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_SPI1_Init();
-  /* USER CODE BEGIN 2 */
 
+  HAL_UART_Transmit(&huart2, "init\n", 5, 0xFFFFFFFF);
+
+  SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
+  /* USER CODE BEGIN 2 */
+	si446x_info_t info = {};
+
+	  // Si446x_init();
+
+	// waitForResponse(NULL, 0, 0);
+
+	  Si446x_getInfo(&info);
+
+
+	HAL_UART_Transmit(&huart2, &info.chipRev, 1, 0xFFFFFFFF);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
+
+   while (1)
+   {
+
+
+ 	/* USER CODE END WHILE */
+
+ 	  // HAL_GPIO_WritePin(SI446x_NSS_GPIO_Port, SI446x_NSS_Pin, 0);
 
     /* USER CODE BEGIN 3 */
   }
@@ -180,7 +222,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

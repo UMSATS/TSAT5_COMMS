@@ -63,16 +63,19 @@
 // --------------------------------------
 
 // SPI slave select pin
-#define SI446X_CSN_PORT		B
-#define SI446X_CSN_BIT		6 // Dummy Pinouts
+#define SI446X_CSN_PORT		A
+#define SI446X_CSN_BIT		4
 
 // Shutdown pin
 #define SI446X_SDN_PORT		B
-#define SI446X_SDN_BIT		5
+#define SI446X_SDN_BIT		6
 
 // Interrupt pin
 #define SI446X_IRQ_PORT		D
 #define SI446X_IRQ_BIT		2
+
+// SPI Port.
+#define SPI_PORT SPI1
 
 
 
