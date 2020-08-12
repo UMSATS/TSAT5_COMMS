@@ -235,7 +235,7 @@ static uint8_t getResponse(void* buff, uint8_t len)
 			spi_transfer_nr(SI446X_CMD_READ_CMD_BUFF);
 
 			// Get CTS value
-			cts = spi_transfer(0xFE);
+			cts = spi_transfer(0xFF);
 
 			// Print CTS Value
 			// HAL_UART_Transmit(&huart2, cts, 1, 0xFFFFFFFF);
