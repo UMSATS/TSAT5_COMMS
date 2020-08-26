@@ -2,3 +2,7 @@
 *.o
 *.map
 *.d
+*.elf
+*.su
+*.list
+*.bin
