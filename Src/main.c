@@ -85,7 +85,7 @@ void spi_transfer_nr(uint8_t data)
     while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
         ;
 }
-
+*/
 static inline uint8_t cselect(void)
 {
 	GPIOA->BSRR = 1 << (4 + 16); // Bitshifts left to lower half of register. (I.E. Pulls low)
@@ -98,7 +98,7 @@ static inline uint8_t cdeselect(void)
 	return 0;
 }
 
-*/
+
 /* USER CODE END 0 */
 
 /**
@@ -109,7 +109,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-  SystemClock_Config();
+SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
@@ -129,18 +129,74 @@ int main(void)
 	  // Si446x_init();
 
 	// waitForResponse(NULL, 0, 0);
-
+/*
 	  Si446x_getInfo(&info);
 
 
 	HAL_UART_Transmit(&huart2, &info.chipRev, 1, 0xFFFFFFFF);
-  /* USER CODE END 2 */
+
+	*/
+  	/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+	// Reset Device
+    GPIOB->BSRR = 1 << (6 + 16); // Upper half of BSRR Register corresponds to setting pin LOW.
+    HAL_Delay(50);
+    GPIOB->BSRR = 1 << (6); // Upper half of BSRR Register corresponds to setting pin HIGH.
+    HAL_Delay(50);
+    GPIOB->BSRR = 1 << (6 + 16);
+    HAL_Delay(50);
+    /*
+	cselect();
+	spi_transfer_nr(0x01);
+	cdeselect();
+
+	// HAL_Delay(1);
+
+	uint8_t cts = 0;
+
+	while (cts != 0xFF) {
+		cdeselect();
+
+		cselect();
+		spi_transfer(0x44);
+
+		char buf[4];
+
+		cts = spi_transfer(0xFF);
+
+
+		// sprintf(buf, "%02X\n", cts);
+		// HAL_UART_Transmit(&huart2, buf, sizeof(buf), 0xFFFFFFFF);
+	}
+
+	char buf[4];
+
+	for (uint8_t i = 0; i < 12; i++) {
+		   uint8_t data = spi_transfer(0xFF);
+
+		   // sprintf(buf, "%02X\n", data);
+		   // HAL_UART_Transmit(&huart2, buf, sizeof(buf), 0xFFFFFFFF);
+	}
+
+	HAL_Delay(10);
+
+	//Si446x_init();
+
+	*/
+
+	cdeselect();
+
+	Si446x_getInfo(&info);
+
+	HAL_Delay(100);
+
    while (1)
    {
+
+
 
 
  	/* USER CODE END WHILE */
