@@ -123,8 +123,11 @@ SystemClock_Config();
   HAL_UART_Transmit(&huart2, "init\n", 5, 0xFFFFFFFF);
 
   SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
+
+  // si446x_init();
+
   /* USER CODE BEGIN 2 */
-	si446x_info_t info = {};
+  si446x_info_t info = {};
 
 	  // Si446x_init();
 
@@ -167,7 +170,27 @@ SystemClock_Config();
 
 	Si446x_getInfo(&info);
 
-	HAL_Delay(100);
+	uint16_t data[6];
+
+	data[0] = (uint16_t)info.chipRev;
+	data[1] = info.part;
+	data[2] = (uint16_t)info.partBuild;
+	data[3] = info.id;
+	data[4] = (uint16_t)info.customer;
+	data[5] = (uint16_t)info.romId;
+
+	for (uint8_t i = 0; i < 6; i++) {
+		char str[8];
+
+		for (uint8_t j = 0; j < 8; j++) {
+			str[j] = 0x00;
+		}
+
+		sprintf(str, "%d\n", data[i]);
+
+		HAL_UART_Transmit(&huart2, &str, sizeof(str), 0xFFFFFFFF);
+	}
+
 
    while (1)
    {
