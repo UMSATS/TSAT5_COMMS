@@ -148,44 +148,20 @@ SystemClock_Config();
     HAL_Delay(50);
     GPIOB->BSRR = 1 << (6 + 16);
     HAL_Delay(50);
-    /*
+
 	cselect();
 	spi_transfer_nr(0x01);
 	cdeselect();
 
 	// HAL_Delay(1);
 
-	uint8_t cts = 0;
 
-	while (cts != 0xFF) {
-		cdeselect();
-
-		cselect();
-		spi_transfer(0x44);
-
-		char buf[4];
-
-		cts = spi_transfer(0xFF);
-
-
-		// sprintf(buf, "%02X\n", cts);
-		// HAL_UART_Transmit(&huart2, buf, sizeof(buf), 0xFFFFFFFF);
-	}
-
-	char buf[4];
-
-	for (uint8_t i = 0; i < 12; i++) {
-		   uint8_t data = spi_transfer(0xFF);
-
-		   // sprintf(buf, "%02X\n", data);
-		   // HAL_UART_Transmit(&huart2, buf, sizeof(buf), 0xFFFFFFFF);
-	}
 
 	HAL_Delay(10);
 
 	//Si446x_init();
 
-	*/
+
 
 	cdeselect();
 

@@ -222,6 +222,40 @@ void Si446x_irq_on(uint8_t origVal)
 
 */
 
+
+
+// A replacement for getResponse and waitForResponse.
+static uint8_t receiveResponse(void* buff, uint8_t len)
+{
+
+	uint8_t cts = 0;
+
+	while (cts != 0xFF) {
+
+		cdeselect();
+
+		cselect();
+		spi_transfer(0x44);
+
+		cts = spi_transfer(0xFF);
+
+	}
+
+	char buf[4];
+
+	// Get response data
+	for(uint8_t i=0;i<len;i++) {
+
+		((uint8_t*)buff)[i] = spi_transfer(0xFF);
+
+	}
+
+	return cts;
+
+}
+
+
+
 // Read CTS and if its ok then read the command buffer
 static uint8_t getResponse(void* buff, uint8_t len)
 {
@@ -258,7 +292,7 @@ static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 	uint16_t timeout = 500; // This should approximate about the same timeout? However with less checks.
 	while(!getResponse(out, outLen))
 	{
-		delay_ms(1); // Hoo boy this is slow. STM32 has no HAL routine for us delay.
+		// delay_ms(1); // Hoo boy this is slow. STM32 has no HAL routine for us delay.
 		if(useTimeout && !--timeout)
 		{
 			SI446X_CB_CMDTIMEOUT();
@@ -272,7 +306,8 @@ static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 {
 	//SI446X_NO_INTERRUPT() // DISABLED - Some sort of funky interrupt
 	//{
-		if(waitForResponse(NULL, 0, 0)) // Make sure it's ok to send a command (set useTimeout to false) -NJR
+		//if(waitForResponse(NULL, 0, 0)) // Make sure it's ok to send a command (set useTimeout to false) -NJR
+		if(receiveResponse(NULL, 0))
 		{
 			// SI446X_ATOMIC()
 			// {
@@ -286,7 +321,8 @@ static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 			if(((uint8_t*)data)[0] == SI446X_CMD_IRCAL) // If we're doing an IRCAL then wait for its completion without a timeout since it can sometimes take a few seconds
 				waitForResponse(NULL, 0, 0);
 			else if(out != NULL) // If we have an output buffer then read command response into it
-				waitForResponse(out, outLen, 1);
+				//waitForResponse(out, outLen, 1);
+				receiveResponse(out, outLen);
 		}
 	//}
 }
