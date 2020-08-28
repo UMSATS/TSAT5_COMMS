@@ -124,7 +124,9 @@ SystemClock_Config();
 
   SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
 
-  // si446x_init();
+  Si446x_init();
+
+  Si446x_read(NULL, 63);
 
   /* USER CODE BEGIN 2 */
   si446x_info_t info = {};
@@ -132,13 +134,13 @@ SystemClock_Config();
 	  // Si446x_init();
 
 	// waitForResponse(NULL, 0, 0);
-/*
-	  Si446x_getInfo(&info);
+
+	  // Si446x_getInfo(&info);
 
 
-	HAL_UART_Transmit(&huart2, &info.chipRev, 1, 0xFFFFFFFF);
+	//HAL_UART_Transmit(&huart2, &info.chipRev, 1, 0xFFFFFFFF);
 
-	*/
+
   	/* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,21 +154,8 @@ SystemClock_Config();
     GPIOB->BSRR = 1 << (6 + 16);
     HAL_Delay(50);
 
-	cselect();
-	spi_transfer_nr(0x01);
-	cdeselect();
 
-	// HAL_Delay(1);
-
-
-
-	HAL_Delay(10);
-
-	//Si446x_init();
-
-
-
-	cdeselect();
+	HAL_Delay(3);
 
 	Si446x_getInfo(&info);
 

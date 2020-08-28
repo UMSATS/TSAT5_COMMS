@@ -543,7 +543,7 @@ void Si446x_init()
 #endif
 */ // TODO
 
-	spi_init(); // Unused.
+	// spi_init(); // Unused.
 
 	SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
 
