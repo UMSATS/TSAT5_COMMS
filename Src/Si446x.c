@@ -805,8 +805,8 @@ uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onT
 	((void)(len));
 #endif
 
-	SI446X_NO_INTERRUPT()
-	{
+	// SI446X_NO_INTERRUPT()
+	// {
 		if (getState() == SI446X_STATE_TX) { // Already transmitting
 			return 0;
 		}
@@ -862,7 +862,6 @@ uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onT
 		// Reset packet length back to max for receive mode
 		setProperty(SI446X_PKT_FIELD_2_LENGTH_LOW, MAX_PACKET_LEN);
 #endif
-	}
 	return 1;
 }
 
