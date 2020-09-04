@@ -1,70 +1,15 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 #include "si446x.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-// #define SPI_PORT SPI1
-// #define CSN_PORT GPIOB
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
 UART_HandleTypeDef huart2;
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
 
 /*
 uint8_t spi_transfer(uint8_t data)
@@ -107,52 +52,34 @@ static inline uint8_t cdeselect(void)
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
 
-SystemClock_Config();
+	SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_USART2_UART_Init();
+	MX_SPI1_Init();
 
-  /* USER CODE END SysInit */
+	HAL_UART_Transmit(&huart2, "init\n", 5, 0xFFFFFFFF);
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_SPI1_Init();
+	SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
 
-  HAL_UART_Transmit(&huart2, "init\n", 5, 0xFFFFFFFF);
+	Si446x_init();
 
-  SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
+	Si446x_read(NULL, 63);
 
-  Si446x_init();
+	/* USER CODE BEGIN 2 */
+	si446x_info_t info = {};
 
-  Si446x_read(NULL, 63);
-
-  /* USER CODE BEGIN 2 */
-  si446x_info_t info = {};
-
-	  // Si446x_init();
-
-	// waitForResponse(NULL, 0, 0);
-
-	  // Si446x_getInfo(&info);
-
-
-	//HAL_UART_Transmit(&huart2, &info.chipRev, 1, 0xFFFFFFFF);
-
-
-  	/* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+	// Si446x_init();
 
 	// Reset Device
-    GPIOB->BSRR = 1 << (6 + 16); // Upper half of BSRR Register corresponds to setting pin LOW.
-    HAL_Delay(50);
-    GPIOB->BSRR = 1 << (6); // Upper half of BSRR Register corresponds to setting pin HIGH.
-    HAL_Delay(50);
-    GPIOB->BSRR = 1 << (6 + 16);
-    HAL_Delay(50);
+	GPIOB->BSRR = 1 << (6 + 16); // Upper half of BSRR Register corresponds to setting pin LOW.
+	HAL_Delay(50);
+	GPIOB->BSRR = 1 << (6); // Upper half of BSRR Register corresponds to setting pin HIGH.
+	HAL_Delay(50);
+	GPIOB->BSRR = 1 << (6 + 16);
+	HAL_Delay(50);
 
 
 	HAL_Delay(3);
@@ -181,19 +108,14 @@ SystemClock_Config();
 	}
 
 
-   while (1)
-   {
+	while (1)
+	{
 
 
 
 
- 	/* USER CODE END WHILE */
+	}
 
- 	  // HAL_GPIO_WritePin(SI446x_NSS_GPIO_Port, SI446x_NSS_Pin, 0);
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
 }
 
 /**
@@ -384,5 +306,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
