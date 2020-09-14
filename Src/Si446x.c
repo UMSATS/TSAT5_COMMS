@@ -250,6 +250,8 @@ static uint8_t receiveResponse(void* buff, uint8_t len)
 
 	}
 
+	cdeselect(); // Break out of CS when done.
+
 	return cts;
 
 }
