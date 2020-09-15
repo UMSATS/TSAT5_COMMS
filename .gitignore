@@ -6,3 +6,5 @@
 *.su
 *.list
 *.bin
+Debug/*
+.settings/*
