@@ -257,7 +257,7 @@ static uint8_t receiveResponse(void* buff, uint8_t len)
 }
 
 
-
+// Effectively Depreciated as its only caller is waitForResponse.
 // Read CTS and if its ok then read the command buffer
 static uint8_t getResponse(void* buff, uint8_t len)
 {
@@ -287,6 +287,7 @@ static uint8_t getResponse(void* buff, uint8_t len)
 	return cts;
 }
 
+// Depreciated.
 // Keep trying to read the command buffer, with timeout of around 500ms
 static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 {
@@ -543,11 +544,9 @@ void Si446x_init()
 	IRQ_PORT |= _BV(IRQ_BIT);
 #endif
 #endif
-*/ // TODO
+*/ // TODO - Figure out Interrupt stuff.
 
-	// spi_init(); // Unused.
-
-	SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
+	spi_init();
 
 	resetDevice();
 	applyStartupConfig();
@@ -557,7 +556,7 @@ void Si446x_init()
 	enabledInterrupts[IRQ_PACKET] = (1<<SI446X_PACKET_RX_PEND) | (1<<SI446X_CRC_ERROR_PEND);
 	//enabledInterrupts[IRQ_MODEM] = (1<<SI446X_SYNC_DETECT_PEND);
 
-	// Si446x_irq_on(1); DISABLED
+	// Si446x_irq_on(1); // DISABLED
 }
 
 void Si446x_getInfo(si446x_info_t* info)

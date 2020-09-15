@@ -1,5 +1,4 @@
 #include "main.h"
-
 #include "si446x.h"
 
 SPI_HandleTypeDef hspi1;
@@ -10,41 +9,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
-
-/*
-uint8_t spi_transfer(uint8_t data)
-{
-    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
-        ;
-
-    // Adapted from STM32 HAL files.
-    return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
-}
-
-void spi_transfer_nr(uint8_t data)
-{
-	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
-
-    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
-        ;
-}
-*/
-static inline uint8_t cselect(void)
-{
-	GPIOA->BSRR = 1 << (4 + 16); // Bitshifts left to lower half of register. (I.E. Pulls low)
-	return 1;
-}
-
-static inline uint8_t cdeselect(void)
-{
-	GPIOA->BSRR = 1 << (4); // Bitshifts left to the upper half of the register. (I.E. Pulls high)
-	return 0;
-}
-
-
-/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -60,53 +24,12 @@ int main(void)
 	MX_USART2_UART_Init();
 	MX_SPI1_Init();
 
-	HAL_UART_Transmit(&huart2, "init\n", 5, 0xFFFFFFFF);
-
-	SPI_PORT->CR1 |= SPI_CR1_SPE; // enable spi.
-
+	// Takes ~5 seconds to complete.
 	Si446x_init();
 
-	Si446x_read(NULL, 63);
-
-	/* USER CODE BEGIN 2 */
 	si446x_info_t info = {};
 
-	// Si446x_init();
-
-	// Reset Device
-	GPIOB->BSRR = 1 << (6 + 16); // Upper half of BSRR Register corresponds to setting pin LOW.
-	HAL_Delay(50);
-	GPIOB->BSRR = 1 << (6); // Upper half of BSRR Register corresponds to setting pin HIGH.
-	HAL_Delay(50);
-	GPIOB->BSRR = 1 << (6 + 16);
-	HAL_Delay(50);
-
-
-	HAL_Delay(3);
-
 	Si446x_getInfo(&info);
-
-	uint16_t data[6];
-
-	data[0] = (uint16_t)info.chipRev;
-	data[1] = info.part;
-	data[2] = (uint16_t)info.partBuild;
-	data[3] = info.id;
-	data[4] = (uint16_t)info.customer;
-	data[5] = (uint16_t)info.romId;
-
-	for (uint8_t i = 0; i < 6; i++) {
-		char str[8];
-
-		for (uint8_t j = 0; j < 8; j++) {
-			str[j] = 0x00;
-		}
-
-		sprintf(str, "%d\n", data[i]);
-
-		HAL_UART_Transmit(&huart2, &str, sizeof(str), 0xFFFFFFFF);
-	}
-
 
 	while (1)
 	{
@@ -115,6 +38,8 @@ int main(void)
 
 
 	}
+
+	return 0; // Satisfy the C standard even though we never get here
 
 }
 
