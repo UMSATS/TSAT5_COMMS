@@ -133,7 +133,7 @@ void spi_transfer_nr(uint8_t data)
 	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
 
     *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
+    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE) // Wait for transmission to finish.
         ;
 }
 
@@ -307,9 +307,9 @@ static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 
 static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 {
-	//SI446X_NO_INTERRUPT() // DISABLED - Some sort of funky interrupt
+	//SI446X_NO_INTERRUPT() // TODO: re-enable when there are interrupts to actually do.
 	//{
-		//if(waitForResponse(NULL, 0, 0)) // Make sure it's ok to send a command (set useTimeout to false) -NJR
+		// Make sure it's ok to send a command (set useTimeout to false) -NJR
 		if(receiveResponse(NULL, 0))
 		{
 			// SI446X_ATOMIC()
@@ -992,7 +992,7 @@ void Si446x_SERVICE()
 
 
 
-// Disabled - AVR-Specific Macto
+// Disabled - AVR-Specific Macro
 ISR(INT_VECTOR) // TODO: Change to STM32.
 #endif
 {
