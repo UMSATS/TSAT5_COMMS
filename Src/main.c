@@ -39,7 +39,7 @@ int main(void)
 
 	}
 
-	return 0; // Satisfy the C standard even though we never get here
+	return 0;
 
 }
 
