@@ -8,5 +8,4 @@
 *.bin
 Debug/*
 .settings/*
-/Drivers/*
 
