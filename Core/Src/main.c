@@ -92,6 +92,13 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
+  // Si446x_init();
+
+	SPI_PORT->CR1 |= SPI_CR1_SPE; // Enable
+
+  si446x_info_t info;
+  Si446x_getInfo(&info);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -167,7 +174,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi1.Init.CRCPolynomial = 7;
   hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  hspi1.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
   if (HAL_SPI_Init(&hspi1) != HAL_OK)
   {
     Error_Handler();
