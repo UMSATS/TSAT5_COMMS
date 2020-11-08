@@ -67,10 +67,10 @@
 #define SI446X_CSN_BIT		4
 
 // Shutdown pin
-#define SI446X_SDN_PORT		B
-#define SI446X_SDN_BIT		6
+#define SI446X_SDN_PORT		C
+#define SI446X_SDN_BIT		1
 
-// Interrupt pin
+// Interrupt pin - TBD - NJR
 #define SI446X_IRQ_PORT		D
 #define SI446X_IRQ_BIT		2
 

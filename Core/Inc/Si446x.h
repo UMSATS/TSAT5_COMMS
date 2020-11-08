@@ -14,7 +14,7 @@
 #include "Si446x_config.h"
 
 // Add HAL for debug
-#include "stm32l0xx_hal.h"
+// #include "stm32f0xx_hal.h"
 
 // Address matching doesnt really work very well as the FIFO still needs to be
 // manually cleared after receiving a packet, so the MCU still needs to wakeup and

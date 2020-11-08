@@ -6,7 +6,7 @@
  * Web: http://blog.zakkemble.co.uk/si4463-radio-library-avr-arduino/
  */
 
-#include "stm32l0xx_hal.h"
+#include "stm32f0xx_hal.h"
 #include "Si446x_spi.h"
 #include "Si446x_config.h"
 

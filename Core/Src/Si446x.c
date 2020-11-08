@@ -9,7 +9,7 @@
 
 #include "Si446x_spi.h"
 
-#include "stm32l0xx_hal.h" // Allows for usage of STM32 HAL-Specific functions, like HAL_Delay().
+#include "stm32f0xx_hal.h" // Allows for usage of STM32 HAL-Specific functions, like HAL_Delay().
 
 #include <string.h>
 #include <stdint.h>
