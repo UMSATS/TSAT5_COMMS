@@ -232,6 +232,8 @@ static uint8_t receiveResponse(void* buff, uint8_t len)
 
 	while (cts != 0xFF) {
 
+		// for (uint32_t i = 0; i < 1000000; i++); // Long delay.
+
 		cdeselect();
 
 		cselect();
@@ -240,8 +242,6 @@ static uint8_t receiveResponse(void* buff, uint8_t len)
 		cts = spi_transfer(0xFF);
 
 	}
-
-	char buf[4];
 
 	// Get response data
 	for(uint8_t i=0;i<len;i++) {
@@ -307,26 +307,25 @@ static uint8_t waitForResponse(void* out, uint8_t outLen, uint8_t useTimeout)
 
 static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 {
-	//SI446X_NO_INTERRUPT() // TODO: re-enable when there are interrupts to actually do.
+	//SI446X_NO_INTERRUPT() // TODO: re-enable when there are interrupts to actually disable. -NJR
 	//{
-		// Make sure it's ok to send a command (set useTimeout to false) -NJR
-		if(receiveResponse(NULL, 0))
-		{
-			// SI446X_ATOMIC()
-			// {
-				CHIPSELECT()
-				{
-					for(uint8_t i=0;i<len;i++)
-						spi_transfer_nr(((uint8_t*)data)[i]); // (pgm_read_byte(&((uint8_t*)data)[i]));
-				}
-			// }
+		// Wait until RF Module is ready. -NJR
+		// Technically this is blocking but commands have to get through eventually. -NJR
+		receiveResponse(NULL, 0);
+		// SI446X_ATOMIC()
+		// {
+			CHIPSELECT()
+			{
+				for(uint8_t i=0;i<len;i++)
+					spi_transfer_nr(((uint8_t*)data)[i]); // (pgm_read_byte(&((uint8_t*)data)[i]));
+			}
+		// }
 
-			if(((uint8_t*)data)[0] == SI446X_CMD_IRCAL) // If we're doing an IRCAL then wait for its completion without a timeout since it can sometimes take a few seconds
-				waitForResponse(NULL, 0, 0);
-			else if(out != NULL) // If we have an output buffer then read command response into it
-				//waitForResponse(out, outLen, 1);
-				receiveResponse(out, outLen);
-		}
+		if(((uint8_t*)data)[0] == SI446X_CMD_IRCAL) // If we're doing an IRCAL then wait for its completion without a timeout since it can sometimes take a few seconds
+			waitForResponse(NULL, 0, 0);
+		else if(out != NULL) // If we have an output buffer then read command response into it
+			//waitForResponse(out, outLen, 1);
+			receiveResponse(out, outLen);
 	//}
 }
 
