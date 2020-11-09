@@ -92,9 +92,9 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
-  // Si446x_init();
+  Si446x_init();
 
-	SPI_PORT->CR1 |= SPI_CR1_SPE; // Enable
+  //SPI_PORT->CR1 |= SPI_CR1_SPE; // Enable
 
   si446x_info_t info;
   Si446x_getInfo(&info);

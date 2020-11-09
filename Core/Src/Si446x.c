@@ -268,7 +268,7 @@ static uint8_t getResponse(void* buff, uint8_t len)
 		CHIPSELECT()
 		{
 			// Send command
-			spi_transfer_nr(SI446X_CMD_READ_CMD_BUFF);
+			spi_transfer(SI446X_CMD_READ_CMD_BUFF);
 
 			// Get CTS value
 			cts = spi_transfer(0xFF);
@@ -317,7 +317,7 @@ static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 			CHIPSELECT()
 			{
 				for(uint8_t i=0;i<len;i++)
-					spi_transfer_nr(((uint8_t*)data)[i]); // (pgm_read_byte(&((uint8_t*)data)[i]));
+					spi_transfer(((uint8_t*)data)[i]); // (pgm_read_byte(&((uint8_t*)data)[i]));
 			}
 		// }
 
@@ -401,7 +401,7 @@ static uint8_t getFRR(uint8_t reg)
 	// {
 		CHIPSELECT()
 		{
-			spi_transfer_nr(reg);
+			spi_transfer(reg); // replaces spi_transfer_nr -NJR
 			frr = spi_transfer(0xFF);
 		}
 	// }
@@ -762,7 +762,7 @@ void Si446x_read(void* buff, uint8_t len)
 	// {
 		CHIPSELECT()
 		{
-			spi_transfer_nr(SI446X_CMD_READ_RX_FIFO);
+			spi_transfer(SI446X_CMD_READ_RX_FIFO); // removed _nr -NJR
 			for(uint8_t i=0;i<len;i++)
 				((uint8_t*)buff)[i] = spi_transfer(0xFF);
 		}
@@ -828,15 +828,15 @@ uint8_t Si446x_TX(void* packet, uint8_t len, uint8_t channel, si446x_state_t onT
 		// {
 			// Load data to FIFO
 			CHIPSELECT()
-			{
-				spi_transfer_nr(SI446X_CMD_WRITE_TX_FIFO);
+			{ // All spi_transfers in this block replace spi_transfer_nr
+				spi_transfer(SI446X_CMD_WRITE_TX_FIFO);
 #if !SI446X_FIXED_LENGTH
-				spi_transfer_nr(len);
+				spi_transfer(len);
 				for(uint8_t i=0;i<len;i++)
-					spi_transfer_nr(((uint8_t*)packet)[i]);
+					spi_transfer(((uint8_t*)packet)[i]);
 #else
 				for(uint8_t i=0;i<SI446X_FIXED_LENGTH;i++)
-					spi_transfer_nr(((uint8_t*)packet)[i]);
+					spi_transfer(((uint8_t*)packet)[i]);
 #endif
 			}
 		// }
