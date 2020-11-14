@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "Si446x.h"
+#include "Si446x/Si446x.h"
 
 /* USER CODE END Includes */
 
@@ -99,6 +99,8 @@ int main(void)
   si446x_info_t info;
   Si446x_getInfo(&info);
 
+  uint8_t data[] = {0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, 0xaa, 0x44, 0xaa, 0xff, };
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,6 +108,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  Si446x_TX(&data, 40, 2, SI446X_STATE_SLEEP);
+	  HAL_Delay(2000);
 
     /* USER CODE BEGIN 3 */
   }

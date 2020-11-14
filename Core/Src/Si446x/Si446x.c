@@ -6,18 +6,15 @@
  * Web: http://blog.zakkemble.co.uk/si4463-radio-library-avr-arduino/
  */
 
-
-#include "Si446x_spi.h"
-
 #include "stm32f0xx_hal.h" // Allows for usage of STM32 HAL-Specific functions, like HAL_Delay().
 
 #include <string.h>
 #include <stdint.h>
-#include "Si446x.h"
-#include "Si446x_config.h"
-#include "Si446x_defs.h"
-
-#include "radio_config.h"
+#include "Si446x/Si446x.h"
+#include "Si446x/Si446x_config.h"
+#include "Si446x/Si446x_defs.h"
+#include "Si446x/radio_config.h"
+#include "Si446x/Si446x_spi.h"
 
 #define IDLE_STATE SI446X_IDLE_MODE
 
@@ -139,7 +136,7 @@ void spi_transfer_nr(uint8_t data)
 
 uint8_t spi_transfer(uint8_t data)
 {
-    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
+    *(volatile uint8_t *) &SPI_PORT->DR = data; // Transmit
     while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
         ;
 
@@ -322,7 +319,7 @@ static void doAPI(void* data, uint8_t len, void* out, uint8_t outLen)
 		// }
 
 		if(((uint8_t*)data)[0] == SI446X_CMD_IRCAL) // If we're doing an IRCAL then wait for its completion without a timeout since it can sometimes take a few seconds
-			waitForResponse(NULL, 0, 0);
+			waitForResponse(NULL, 0, 0); // Can swap. -NJR
 		else if(out != NULL) // If we have an output buffer then read command response into it
 			//waitForResponse(out, outLen, 1);
 			receiveResponse(out, outLen);
