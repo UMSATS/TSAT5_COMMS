@@ -10,11 +10,12 @@
 
 #include <string.h>
 #include <stdint.h>
+#include "Si446x/Si446x_spi.h"
 #include "Si446x/Si446x.h"
 #include "Si446x/Si446x_config.h"
 #include "Si446x/Si446x_defs.h"
 #include "Si446x/radio_config.h"
-#include "Si446x/Si446x_spi.h"
+
 
 #define IDLE_STATE SI446X_IDLE_MODE
 
@@ -109,45 +110,6 @@ static inline uint8_t interrupt_on(void)
 #endif
 
 #endif
-
-
-// CHECK THIS - Bit shifting may be wrong
-static inline uint8_t cselect(void)
-{
-	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT + 16); // Bitshifts left to lower half of register.
-	return 1;
-}
-
-static inline uint8_t cdeselect(void)
-{
-	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT); // Bitshifts left to the upper half of the register.
-	return 0;
-}
-
-
-void spi_transfer_nr(uint8_t data)
-{
-	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
-
-    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE) // Wait for transmission to finish.
-        ;
-}
-
-uint8_t spi_transfer(uint8_t data)
-{
-    *(volatile uint8_t *) &SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
-        ;
-
-    // Adapted from STM32 HAL files.
-    return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
-}
-
-
-
-
-#define CHIPSELECT()	for(uint8_t _cs = cselect(); _cs; _cs = cdeselect()) // Makes use of the behaviour of the expressions of for loops to run code once while Chipselected, then switching it off at the end.
 
 // TODO
 // 2 types of interrupt blocks

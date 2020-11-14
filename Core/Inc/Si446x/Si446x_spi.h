@@ -9,33 +9,28 @@
 #ifndef SI446X_SPI_H_
 #define SI446X_SPI_H_
 
-#include <stdint.h> // Really?
-
-void spi_init(void);
+#include "Si446x/Si446x_defs.h"
 
 /*
-
-inline void spi_transfer_nr(uint8_t data)
-{
-	// The following is adapted from: https://stackoverflow.com/questions/56440516/stm32-spi-slow-compute.
-
-    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
-        ;
-}
-
-inline uint8_t spi_transfer(uint8_t data)
-{
-    *(volatile uint8_t *)&SPI_PORT->DR = data; // Transmit
-    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
-        ;
-    
-    // Adapted from STM32 HAL files.
-    return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
-}
-*/
+ * Ensures SPI bus is initialized after STM32 HAL does its job. -NJR
+ */
+void spi_init(void);
 
 
-// MOVED TO si446x.c
+/*
+ * Transmits (and receives) SPI data over bus.
+ */
+uint8_t spi_transfer(uint8_t data);
+
+
+/*
+ * Handles CS Line.
+ */
+uint8_t cselect(void);
+
+uint8_t cdeselect(void);
+
+// Makes use of the behaviour of the for loop conditionals run code in block once while Chipselected, then switching it off at the end.
+#define CHIPSELECT()	for(uint8_t _cs = cselect(); _cs; _cs = cdeselect())
 
 #endif /* SI446X_SPI_H_ */

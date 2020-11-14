@@ -27,3 +27,25 @@ void spi_init()
 {
 	SPI_PORT->CR1 |= SPI_CR1_SPE; // Enable SPI.
 }
+
+uint8_t cselect(void)
+{
+	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT + 16); // Bitshifts left to lower half of register.
+	return 1;
+}
+
+uint8_t cdeselect(void)
+{
+	CSN_PORT->BSRR = 1 << (SI446X_CSN_BIT); // Bitshifts left to the upper half of the register.
+	return 0;
+}
+
+uint8_t spi_transfer(uint8_t data)
+{
+    *(volatile uint8_t *) &SPI_PORT->DR = data; // Transmit
+    while((SPI_PORT->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE)
+        ;
+
+    // Adapted from STM32 HAL files.
+    return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
+}
