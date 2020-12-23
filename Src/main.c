@@ -1,5 +1,5 @@
 #include "main.h"
-#include "si446x.h"
+#include "Si446x.h"
 
 SPI_HandleTypeDef hspi1;
 
