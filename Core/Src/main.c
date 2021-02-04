@@ -108,10 +108,13 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
+	  /*
     Si446x_setTxPower(1);
 	Si446x_TX(&data, 1, 2, SI446X_STATE_SLEEP);
 	HAL_Delay(1000);
 
+	   */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
