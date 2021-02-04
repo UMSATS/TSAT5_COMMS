@@ -49,3 +49,8 @@ uint8_t spi_transfer(uint8_t data)
     // Adapted from STM32 HAL files.
     return *(volatile uint8_t *)&SPI_PORT->DR; // Receive
 }
+
+void spi_transfer_nr(uint8_t data)
+{
+	spi_transfer(data);
+}
