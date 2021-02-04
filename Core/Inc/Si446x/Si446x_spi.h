@@ -22,6 +22,11 @@ void spi_init(void);
  */
 uint8_t spi_transfer(uint8_t data);
 
+/*
+ * Transmits SPI Data. A wrapper for spi_transfer().
+ */
+void spi_transfer_nr(uint8_t data);
+
 
 /*
  * Handles CS Line.
